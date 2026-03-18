@@ -1,1 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Supabase Test</title>
+</head>
 
+<body>
+
+<h1>Supabase Connected</h1>
+<button onclick="addData()">Add Data</button>
+
+<!-- مكتبة Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+  const SUPABASE_URL = "https://uidmfztnatlnkcliitopk.supabase.co";
+
+  const SUPABASE_ANON_KEY = "sb_publishable_wwbfSvYnk2Xady7Kywasvg_QQPynG5l";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function addData() {
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([{ name: 'Ali' }]);
+
+    if (error) {
+      console.log(error);
+      alert("Error: " + error.message);
+    } else {
+      alert("Success!");
+    }
+  }
+</script>
+
+</body>
+</html>
