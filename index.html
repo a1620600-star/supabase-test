@@ -1,64 +1,219 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>Supabase System</title>
+<meta charset="UTF-8">
+<title>ثانوية الأندلس - النظام الإداري</title>
+
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#0F9D8A;color:#fff;padding:15px;font-size:20px}
+nav{background:#fff;padding:10px;display:flex;flex-wrap:wrap}
+nav button{margin:5px;padding:8px 12px;border:none;background:#0F9D8A;color:#fff;border-radius:6px}
+.section{display:none;padding:15px}
+.card{background:#fff;padding:12px;margin:10px;border-radius:10px}
+input,select{padding:6px;margin:5px;width:200px}
+</style>
 </head>
 
 <body>
 
-<h1>نظام بسيط</h1>
+<header>نظام ثانوية الأندلس</header>
 
-<input id="name" placeholder="اكتب اسمك" />
-<button onclick="addData()">إضافة</button>
+<nav>
+<button onclick="show('dashboard')">لوحة التحكم</button>
+<button onclick="show('teachers')">المعلمين</button>
+<button onclick="show('plans')">الخطط</button>
+<button onclick="show('performance')">الأداء</button>
+<button onclick="show('students')">التحصيل</button>
+<button onclick="show('tasks')">التكليفات</button>
+</nav>
 
-<h2>البيانات:</h2>
-<ul id="list"></ul>
+<!-- لوحة التحكم -->
+<div id="dashboard" class="section">
+<div class="card">
+<h3>لوحة التحكم التنفيذية</h3>
+عدد البنود: <span id="count"></span>
+</div>
+</div>
+
+<!-- المعلمين -->
+<div id="teachers" class="section">
+<div class="card">
+<h3>بيانات المعلمين</h3>
+<input id="tname" placeholder="اسم المعلم">
+<input id="subject" placeholder="المادة">
+<button onclick="addTeacher()">إضافة</button>
+<ul id="tlist"></ul>
+</div>
+</div>
+
+<!-- الخطط -->
+<div id="plans" class="section">
+<div class="card">
+<h3>الخطة التشغيلية / التحسين</h3>
+<input id="plan" placeholder="البند">
+<input id="week" placeholder="الأسبوع">
+<button onclick="addPlan()">إضافة</button>
+<ul id="plist"></ul>
+</div>
+</div>
+
+<!-- الأداء -->
+<div id="performance" class="section">
+<div class="card">
+<h3>الأداء الوظيفي</h3>
+<input id="pname" placeholder="اسم المعلم">
+<select id="rate">
+<option>ممتاز</option>
+<option>جيد</option>
+<option>ضعيف</option>
+</select>
+<button onclick="addPerformance()">حفظ</button>
+<ul id="perlist"></ul>
+</div>
+</div>
+
+<!-- التحصيل -->
+<div id="students" class="section">
+<div class="card">
+<h3>التحصيل الدراسي</h3>
+<input id="sname" placeholder="اسم الطالب">
+<input id="score" placeholder="الدرجة">
+<button onclick="addStudent()">إضافة</button>
+<ul id="slist"></ul>
+</div>
+</div>
+
+<!-- التكليفات -->
+<div id="tasks" class="section">
+<div class="card">
+<h3>التكليفات</h3>
+<input id="task" placeholder="المهمة">
+<button onclick="addTask()">إضافة</button>
+<ul id="tasklist"></ul>
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://eslpnwxezkhddqxnhdlh.supabase.co";
-const supabaseKey = "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4";
+const supabase = window.supabase.createClient(
+"https://eslpnwxezkhddqxnhdlh.supabase.co",
+"sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
+);
 
-const client = supabase.createClient(supabaseUrl, supabaseKey);
-
-// إضافة بيانات
-async function addData() {
-  const name = document.getElementById("name").value;
-
-  const { error } = await client
-    .from("profiles")
-    .insert([{ name: name }]);
-
-  if (error) {
-    alert("خطأ: " + error.message);
-  } else {
-    document.getElementById("name").value = "";
-    loadData();
-  }
+// التنقل
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
 }
 
-// عرض البيانات
-async function loadData() {
-  const { data, error } = await client
-    .from("profiles")
-    .select("*");
+// المعلمين
+async function addTeacher(){
+let name = tname.value;
+let subject = document.getElementById("subject").value;
 
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  if (data) {
-    data.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item.name;
-      list.appendChild(li);
-    });
-  }
+await supabase.from("profiles").insert([{name,subject,type:"teacher"}]);
+loadTeachers();
 }
 
-// تحميل البيانات عند فتح الصفحة
-loadData();
+async function loadTeachers(){
+let {data}=await supabase.from("profiles").select("*").eq("type","teacher");
+tlist.innerHTML="";
+data.forEach(t=>{
+tlist.innerHTML+=`<li>${t.name} - ${t.subject}</li>`;
+});
+}
+
+// الخطط
+async function addPlan(){
+let title=plan.value;
+let w=week.value;
+
+await supabase.from("profiles").insert([{title,week:w,type:"plan",status:"لم ينفذ"}]);
+loadPlans();
+}
+
+async function loadPlans(){
+let {data}=await supabase.from("profiles").select("*").eq("type","plan");
+plist.innerHTML="";
+data.forEach(p=>{
+plist.innerHTML+=`
+<li>${p.title} - ${p.week} - ${p.status}
+<button onclick="updatePlan('${p.id}','تم')">تم</button>
+</li>`;
+});
+}
+
+async function updatePlan(id,status){
+await supabase.from("profiles").update({status}).eq("id",id);
+loadPlans();
+}
+
+// الأداء
+async function addPerformance(){
+let name=pname.value;
+let rate=document.getElementById("rate").value;
+
+await supabase.from("profiles").insert([{name,rate,type:"performance"}]);
+loadPerformance();
+}
+
+async function loadPerformance(){
+let {data}=await supabase.from("profiles").select("*").eq("type","performance");
+perlist.innerHTML="";
+data.forEach(p=>{
+perlist.innerHTML+=`<li>${p.name} - ${p.rate}</li>`;
+});
+}
+
+// الطلاب
+async function addStudent(){
+let name=sname.value;
+let score=parseInt(document.getElementById("score").value);
+
+let status = score<50 ? "مخفق" : "ناجح";
+
+await supabase.from("profiles").insert([{name,score,status,type:"student"}]);
+
+if(status==="مخفق"){
+alert("تم تحويل الطالب إلى خطة علاجية");
+}
+
+loadStudents();
+}
+
+async function loadStudents(){
+let {data}=await supabase.from("profiles").select("*").eq("type","student");
+slist.innerHTML="";
+data.forEach(s=>{
+slist.innerHTML+=`<li>${s.name} - ${s.score} - ${s.status}</li>`;
+});
+}
+
+// التكليفات
+async function addTask(){
+let task=document.getElementById("task").value;
+
+await supabase.from("profiles").insert([{task,type:"task"}]);
+loadTasks();
+}
+
+async function loadTasks(){
+let {data}=await supabase.from("profiles").select("*").eq("type","task");
+tasklist.innerHTML="";
+data.forEach(t=>{
+tasklist.innerHTML+=`<li>${t.task}</li>`;
+});
+}
+
+// تحميل أولي
+show("dashboard");
+loadTeachers();
+loadPlans();
+loadPerformance();
+loadStudents();
+loadTasks();
 </script>
 
 </body>
