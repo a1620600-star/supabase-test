@@ -2,219 +2,351 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>ثانوية الأندلس - النظام الإداري</title>
+<title>ثانوية الأندلس - النظام القيادي</title>
 
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#0F9D8A;color:#fff;padding:15px;font-size:20px}
-nav{background:#fff;padding:10px;display:flex;flex-wrap:wrap}
-nav button{margin:5px;padding:8px 12px;border:none;background:#0F9D8A;color:#fff;border-radius:6px}
-.section{display:none;padding:15px}
-.card{background:#fff;padding:12px;margin:10px;border-radius:10px}
-input,select{padding:6px;margin:5px;width:200px}
+:root{--c:#0F9D8A;--bg:#f4f6f8}
+body{font-family:Arial;background:var(--bg);margin:0}
+header{background:var(--c);color:#fff;padding:14px;font-size:20px}
+nav{background:#fff;padding:10px;display:flex;flex-wrap:wrap;gap:6px}
+nav button{background:var(--c);color:#fff;border:none;padding:7px 12px;border-radius:6px}
+.section{display:none;padding:12px}
+.card{background:#fff;margin:8px;padding:10px;border-radius:10px}
+input,select{padding:6px;margin:4px}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #ddd;padding:6px}
+.small{font-size:12px;color:#555}
 </style>
 </head>
 
 <body>
 
-<header>نظام ثانوية الأندلس</header>
+<header>نظام القيادة المدرسية – ثانوية الأندلس</header>
 
 <nav>
-<button onclick="show('dashboard')">لوحة التحكم</button>
-<button onclick="show('teachers')">المعلمين</button>
-<button onclick="show('plans')">الخطط</button>
-<button onclick="show('performance')">الأداء</button>
-<button onclick="show('students')">التحصيل</button>
-<button onclick="show('tasks')">التكليفات</button>
+<button onclick="go('dash')">لوحة القيادة</button>
+<button onclick="go('admin')">الهيئة</button>
+<button onclick="go('teachers')">المعلمين</button>
+<button onclick="go('plans')">الخطط</button>
+<button onclick="go('performance')">الأداء</button>
+<button onclick="go('students')">التحصيل</button>
+<button onclick="go('tasks')">التكليفات</button>
+<button onclick="go('committees')">اللجان</button>
+<button onclick="go('supervision')">الإشراف</button>
+<button onclick="go('guidance')">التوجيه</button>
+<button onclick="go('activity')">النشاط</button>
+<button onclick="go('labs')">المختبرات</button>
+<button onclick="go('resources')">المصادر</button>
+<button onclick="go('messages')">الرسائل</button>
+<button onclick="go('settings')">الإعدادات</button>
+<button onclick="go('report')">التقارير</button>
 </nav>
 
-<!-- لوحة التحكم -->
-<div id="dashboard" class="section">
+<!-- DASHBOARD -->
+<div id="dash" class="section">
 <div class="card">
-<h3>لوحة التحكم التنفيذية</h3>
-عدد البنود: <span id="count"></span>
+<h3>المؤشرات التنفيذية</h3>
+<div id="kpis"></div>
 </div>
 </div>
 
-<!-- المعلمين -->
+<!-- ADMIN -->
+<div id="admin" class="section">
+<div class="card">
+<h3>الهيئة الإدارية</h3>
+<input id="admin_name" placeholder="الاسم">
+<input id="admin_role" placeholder="المنصب">
+<button onclick="add('admin')">إضافة</button>
+<div id="admin_list"></div>
+</div>
+</div>
+
+<!-- TEACHERS -->
 <div id="teachers" class="section">
 <div class="card">
 <h3>بيانات المعلمين</h3>
-<input id="tname" placeholder="اسم المعلم">
-<input id="subject" placeholder="المادة">
-<button onclick="addTeacher()">إضافة</button>
-<ul id="tlist"></ul>
+<input id="t_name" placeholder="الاسم">
+<input id="t_sub" placeholder="المادة">
+<button onclick="add('teacher')">إضافة</button>
+<div id="teacher_list"></div>
 </div>
 </div>
 
-<!-- الخطط -->
+<!-- PLANS -->
 <div id="plans" class="section">
 <div class="card">
-<h3>الخطة التشغيلية / التحسين</h3>
-<input id="plan" placeholder="البند">
-<input id="week" placeholder="الأسبوع">
-<button onclick="addPlan()">إضافة</button>
-<ul id="plist"></ul>
+<h3>الخطة التشغيلية / التحسين / الفصلية / الأسبوعية</h3>
+<select id="plan_type">
+<option value="operational">تشغيلية</option>
+<option value="improvement">تحسين</option>
+<option value="term">فصلية</option>
+<option value="weekly">أسبوعية</option>
+</select>
+<input id="plan_title" placeholder="البند">
+<input id="plan_week" placeholder="الأسبوع/الفصل">
+<input type="file" id="plan_file">
+<button onclick="addPlan()">حفظ</button>
+<div id="plan_list"></div>
 </div>
 </div>
 
-<!-- الأداء -->
+<!-- PERFORMANCE -->
 <div id="performance" class="section">
 <div class="card">
 <h3>الأداء الوظيفي</h3>
-<input id="pname" placeholder="اسم المعلم">
-<select id="rate">
-<option>ممتاز</option>
-<option>جيد</option>
-<option>ضعيف</option>
+<input id="p_name" placeholder="المعلم">
+<select id="p_rate">
+<option>ممتاز</option><option>جيد</option><option>ضعيف</option>
 </select>
 <button onclick="addPerformance()">حفظ</button>
-<ul id="perlist"></ul>
+<div id="performance_list"></div>
 </div>
 </div>
 
-<!-- التحصيل -->
+<!-- STUDENTS -->
 <div id="students" class="section">
 <div class="card">
-<h3>التحصيل الدراسي</h3>
-<input id="sname" placeholder="اسم الطالب">
-<input id="score" placeholder="الدرجة">
+<h3>التحصيل الدراسي + التحويل العلاجي</h3>
+<input id="s_name" placeholder="الطالب">
+<input id="s_score" placeholder="الدرجة">
 <button onclick="addStudent()">إضافة</button>
-<ul id="slist"></ul>
+<div id="student_list"></div>
 </div>
 </div>
 
-<!-- التكليفات -->
+<!-- TASKS -->
 <div id="tasks" class="section">
 <div class="card">
 <h3>التكليفات</h3>
-<input id="task" placeholder="المهمة">
-<button onclick="addTask()">إضافة</button>
-<ul id="tasklist"></ul>
+<input id="task_title" placeholder="المهمة">
+<button onclick="addSimple('task')">إضافة</button>
+<div id="task_list"></div>
+</div>
+</div>
+
+<!-- COMMITTEES -->
+<div id="committees" class="section">
+<div class="card">
+<h3>اللجان</h3>
+<input id="com_title" placeholder="اللجنة">
+<button onclick="addSimple('committee')">إضافة</button>
+<div id="committee_list"></div>
+</div>
+</div>
+
+<!-- SUPERVISION -->
+<div id="supervision" class="section">
+<div class="card">
+<h3>الإشراف</h3>
+<input id="sup_title" placeholder="الملاحظة">
+<button onclick="addSimple('supervision')">إضافة</button>
+<div id="supervision_list"></div>
+</div>
+</div>
+
+<!-- GUIDANCE -->
+<div id="guidance" class="section">
+<div class="card">
+<h3>التوجيه الطلابي</h3>
+<input id="g_title" placeholder="الحالة">
+<button onclick="addSimple('guidance')">إضافة</button>
+<div id="guidance_list"></div>
+</div>
+</div>
+
+<!-- ACTIVITY -->
+<div id="activity" class="section">
+<div class="card">
+<h3>النشاط الطلابي</h3>
+<input id="a_title" placeholder="النشاط">
+<button onclick="addSimple('activity')">إضافة</button>
+<div id="activity_list"></div>
+</div>
+</div>
+
+<!-- LABS -->
+<div id="labs" class="section">
+<div class="card">
+<h3>المختبرات</h3>
+<input id="l_title" placeholder="التجهيز">
+<button onclick="addSimple('lab')">إضافة</button>
+<div id="lab_list"></div>
+</div>
+</div>
+
+<!-- RESOURCES -->
+<div id="resources" class="section">
+<div class="card">
+<h3>المصادر</h3>
+<input id="r_title" placeholder="المصدر">
+<button onclick="addSimple('resource')">إضافة</button>
+<div id="resource_list"></div>
+</div>
+</div>
+
+<!-- MESSAGES -->
+<div id="messages" class="section">
+<div class="card">
+<h3>الرسائل</h3>
+<input id="m_title" placeholder="الرسالة">
+<button onclick="addSimple('message')">إرسال</button>
+<div id="message_list"></div>
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="section">
+<div class="card">
+<h3>الإعدادات</h3>
+<span class="small">القيم محفوظة في النظام (profiles type=settings)</span>
+<input id="set_key" placeholder="المفتاح">
+<input id="set_val" placeholder="القيمة">
+<button onclick="saveSetting()">حفظ</button>
+<div id="settings_list"></div>
+</div>
+</div>
+
+<!-- REPORT -->
+<div id="report" class="section">
+<div class="card">
+<h3>تقرير رسمي</h3>
+<button onclick="exportPDF()">تحميل PDF</button>
 </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const client = supabase.createClient(
 "https://eslpnwxezkhddqxnhdlh.supabase.co",
 "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
 );
 
-// التنقل
-function show(id){
+// NAV
+function go(id){
 document.querySelectorAll(".section").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
-// المعلمين
-async function addTeacher(){
-let name = tname.value;
-let subject = document.getElementById("subject").value;
+// GENERIC ADD
+async function add(type){
+let name = document.getElementById(type+"_name").value;
+let role = document.getElementById(type+"_role")?.value || document.getElementById("t_sub")?.value;
 
-await supabase.from("profiles").insert([{name,subject,type:"teacher"}]);
-loadTeachers();
+await client.from("profiles").insert([{name, value:role, type}]);
+load(type);
 }
 
-async function loadTeachers(){
-let {data}=await supabase.from("profiles").select("*").eq("type","teacher");
-tlist.innerHTML="";
-data.forEach(t=>{
-tlist.innerHTML+=`<li>${t.name} - ${t.subject}</li>`;
-});
+// SIMPLE ADD
+async function addSimple(type){
+let el = document.getElementById(type+"_title") || document.getElementById(type.charAt(0)+"_title");
+let title = el.value;
+
+await client.from("profiles").insert([{title, type}]);
+load(type);
 }
 
-// الخطط
+// PLANS (with evidence)
 async function addPlan(){
-let title=plan.value;
-let w=week.value;
+let type=document.getElementById("plan_type").value;
+let title=document.getElementById("plan_title").value;
+let week=document.getElementById("plan_week").value;
+let file=document.getElementById("plan_file").files[0];
 
-await supabase.from("profiles").insert([{title,week:w,type:"plan",status:"لم ينفذ"}]);
-loadPlans();
+let evidence="";
+if(file){
+let up=await client.storage.from("evidences").upload("f_"+Date.now(),file);
+evidence=up.data?.path||"";
 }
 
-async function loadPlans(){
-let {data}=await supabase.from("profiles").select("*").eq("type","plan");
-plist.innerHTML="";
-data.forEach(p=>{
-plist.innerHTML+=`
-<li>${p.title} - ${p.week} - ${p.status}
-<button onclick="updatePlan('${p.id}','تم')">تم</button>
-</li>`;
-});
+await client.from("profiles").insert([{type,title,week,evidence,status:"لم ينفذ"}]);
+load("plan");
 }
 
-async function updatePlan(id,status){
-await supabase.from("profiles").update({status}).eq("id",id);
-loadPlans();
-}
-
-// الأداء
+// PERFORMANCE
 async function addPerformance(){
-let name=pname.value;
-let rate=document.getElementById("rate").value;
-
-await supabase.from("profiles").insert([{name,rate,type:"performance"}]);
-loadPerformance();
+let name=document.getElementById("p_name").value;
+let rate=document.getElementById("p_rate").value;
+await client.from("profiles").insert([{name,value:rate,type:"performance"}]);
+load("performance");
 }
 
-async function loadPerformance(){
-let {data}=await supabase.from("profiles").select("*").eq("type","performance");
-perlist.innerHTML="";
-data.forEach(p=>{
-perlist.innerHTML+=`<li>${p.name} - ${p.rate}</li>`;
-});
-}
-
-// الطلاب
+// STUDENTS + AUTO REMEDIAL
 async function addStudent(){
-let name=sname.value;
-let score=parseInt(document.getElementById("score").value);
+let name=s_name.value;
+let score=parseInt(s_score.value||0);
+let status = score<50 ? "مخفق":"ناجح";
 
-let status = score<50 ? "مخفق" : "ناجح";
-
-await supabase.from("profiles").insert([{name,score,status,type:"student"}]);
+await client.from("profiles").insert([{name,score,status,type:"student"}]);
 
 if(status==="مخفق"){
+await client.from("profiles").insert([{title:"خطة علاجية لـ "+name,type:"remedial"}]);
 alert("تم تحويل الطالب إلى خطة علاجية");
 }
 
-loadStudents();
+load("student");
 }
 
-async function loadStudents(){
-let {data}=await supabase.from("profiles").select("*").eq("type","student");
-slist.innerHTML="";
-data.forEach(s=>{
-slist.innerHTML+=`<li>${s.name} - ${s.score} - ${s.status}</li>`;
+// SETTINGS
+async function saveSetting(){
+await client.from("profiles").insert([{
+title:set_key.value,
+value:set_val.value,
+type:"settings"
+}]);
+load("settings");
+}
+
+// LOAD
+async function load(type){
+let {data}=await client.from("profiles").select("*");
+
+function render(list,filter,el){
+el.innerHTML="";
+list.filter(filter).forEach(i=>{
+el.innerHTML+=`
+<div class="card">
+${i.name||i.title} ${i.value||""} ${i.week||""}
+${i.evidence?`<a href="#">📎</a>`:""}
+</div>`;
 });
 }
 
-// التكليفات
-async function addTask(){
-let task=document.getElementById("task").value;
-
-await supabase.from("profiles").insert([{task,type:"task"}]);
-loadTasks();
+render(data,i=>i.type==="admin",admin_list);
+render(data,i=>i.type==="teacher",teacher_list);
+render(data,i=>i.type==="plan",plan_list);
+render(data,i=>i.type==="performance",performance_list);
+render(data,i=>i.type==="student",student_list);
+render(data,i=>i.type==="task",task_list);
+render(data,i=>i.type==="committee",committee_list);
+render(data,i=>i.type==="supervision",supervision_list);
+render(data,i=>i.type==="guidance",guidance_list);
+render(data,i=>i.type==="activity",activity_list);
+render(data,i=>i.type==="lab",lab_list);
+render(data,i=>i.type==="resource",resource_list);
+render(data,i=>i.type==="message",message_list);
+render(data,i=>i.type==="settings",settings_list);
 }
 
-async function loadTasks(){
-let {data}=await supabase.from("profiles").select("*").eq("type","task");
-tasklist.innerHTML="";
-data.forEach(t=>{
-tasklist.innerHTML+=`<li>${t.task}</li>`;
-});
+// KPI
+async function loadKPI(){
+let {data}=await client.from("profiles").select("*");
+let students=data.filter(x=>x.type==="student").length;
+let plans=data.filter(x=>x.type==="plan").length;
+kpis.innerHTML=`طلاب: ${students} | خطط: ${plans}`;
 }
 
-// تحميل أولي
-show("dashboard");
-loadTeachers();
-loadPlans();
-loadPerformance();
-loadStudents();
-loadTasks();
+// PDF
+function exportPDF(){
+html2pdf().from(document.body).save("report.pdf");
+}
+
+// INIT
+go("dash");
+load();
+loadKPI();
+
 </script>
-
 </body>
 </html>
