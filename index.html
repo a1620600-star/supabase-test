@@ -1,95 +1,37 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>نظام إدارة المدرسة</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body {font-family: Arial; direction: rtl; padding:20px;}
-button {padding:10px 20px; background:#1e40af; color:#fff; border:none;}
-</style>
-
-</head>
-
-<body>
-
-<h2>رفع شاهد</h2>
-
-<input type="text" id="name" placeholder="اسم السجل">
-<br><br>
-<input type="file" id="file">
-<br><br>
-<button onclick="upload()">حفظ + رفع</button>
-
 <script>
-
 const supabase = window.supabase.createClient(
   "https://eslpnwxezkhddqxnhdlh.supabase.co",
   "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
 );
 
-async function upload() {
-
-  const fileInput = document.getElementById("file");
-  const name = document.getElementById("name").value;
-
+async function uploadFile() {
+  const fileInput = document.querySelector('input[type="file"]');
   const file = fileInput.files[0];
 
   if (!file) {
-    alert("اختر ملف");
+    alert("اختر ملف أولاً");
     return;
   }
 
-  const fileName = Date.now() + "_" + file.name;
+  const fileName = Date.now() + "-" + file.name;
 
-  // رفع الملف
-  const { error } = await supabase
-    .storage
+  const { data, error } = await supabase.storage
     .from("files")
     .upload(fileName, file);
 
   if (error) {
-    alert("خطأ رفع: " + error.message);
-    console.log(error);
+    console.error(error);
+    alert("فشل رفع الملف: " + error.message);
     return;
   }
 
-  // جلب الرابط
-  const { data } = supabase
-    .storage
+  const { data: publicUrl } = supabase.storage
     .from("files")
     .getPublicUrl(fileName);
 
-  // حفظ في قاعدة البيانات
-  const res = await fetch(
-    "https://eslpnwxezkhddqxnhdlh.supabase.co/rest/v1/core",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4",
-        "Authorization": "Bearer sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
-      },
-      body: JSON.stringify({
-        type: "file",
-        title: name || "بدون اسم",
-        file_url: data.publicUrl
-      })
-    }
-  );
-
-  if (!res.ok) {
-    alert("فشل حفظ البيانات");
-    return;
-  }
-
-  alert("تم بنجاح");
-  location.reload();
+  alert("تم الرفع بنجاح");
+  console.log(publicUrl.publicUrl);
 }
-
 </script>
-
-</body>
-</html>
