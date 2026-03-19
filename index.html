@@ -1,45 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>نظام إدارة المدرسة</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<style>
+body {font-family: Arial; direction: rtl; padding:20px;}
+button {padding:10px 20px; background:#1e40af; color:#fff; border:none;}
+</style>
+
+</head>
+
+<body>
+
+<h2>رفع شاهد</h2>
+
+<input type="text" id="name" placeholder="اسم السجل">
+<br><br>
+<input type="file" id="file">
+<br><br>
+<button onclick="upload()">حفظ + رفع</button>
+
 <script>
+
 const supabase = window.supabase.createClient(
   "https://eslpnwxezkhddqxnhdlh.supabase.co",
   "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
 );
 
-async function uploadFile(file) {
-  const fileName = Date.now() + "_" + file.name;
+async function upload() {
 
-  const { data, error } = await supabase
-    .storage
-    .from("files")
-    .upload(fileName, file);
-
-  if (error) {
-    alert("خطأ: " + error.message);
-    return null;
-  }
-
-  const { data: publicUrl } = supabase
-    .storage
-    .from("files")
-    .getPublicUrl(fileName);
-
-  return publicUrl.publicUrl;
-}
-
-async function addData() {
-  const fileInput = document.querySelector("input[type='file']");
-  const nameInput = document.querySelector("input[type='text']");
+  const fileInput = document.getElementById("file");
+  const name = document.getElementById("name").value;
 
   const file = fileInput.files[0];
+
   if (!file) {
     alert("اختر ملف");
     return;
   }
 
-  const fileUrl = await uploadFile(file);
-  if (!fileUrl) return;
+  const fileName = Date.now() + "_" + file.name;
 
+  // رفع الملف
+  const { error } = await supabase
+    .storage
+    .from("files")
+    .upload(fileName, file);
+
+  if (error) {
+    alert("خطأ رفع: " + error.message);
+    console.log(error);
+    return;
+  }
+
+  // جلب الرابط
+  const { data } = supabase
+    .storage
+    .from("files")
+    .getPublicUrl(fileName);
+
+  // حفظ في قاعدة البيانات
   const res = await fetch(
     "https://eslpnwxezkhddqxnhdlh.supabase.co/rest/v1/core",
     {
@@ -51,17 +74,22 @@ async function addData() {
       },
       body: JSON.stringify({
         type: "file",
-        title: nameInput.value || "بدون اسم",
-        file_url: fileUrl
+        title: name || "بدون اسم",
+        file_url: data.publicUrl
       })
     }
   );
 
   if (!res.ok) {
     alert("فشل حفظ البيانات");
-  } else {
-    alert("تم بنجاح");
-    location.reload();
+    return;
   }
+
+  alert("تم بنجاح");
+  location.reload();
 }
+
 </script>
+
+</body>
+</html>
