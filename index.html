@@ -2,13 +2,18 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Supabase Test</title>
+  <title>Supabase System</title>
 </head>
 
 <body>
 
-<h1>Supabase Connected</h1>
-<button onclick="addData()">Add Data</button>
+<h1>نظام بسيط</h1>
+
+<input id="name" placeholder="اكتب اسمك" />
+<button onclick="addData()">إضافة</button>
+
+<h2>البيانات:</h2>
+<ul id="list"></ul>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,19 +23,42 @@ const supabaseKey = "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4";
 
 const client = supabase.createClient(supabaseUrl, supabaseKey);
 
+// إضافة بيانات
 async function addData() {
-  const { data, error } = await client
+  const name = document.getElementById("name").value;
+
+  const { error } = await client
     .from("profiles")
-    .insert([{ name: "Ali" }]);
+    .insert([{ name: name }]);
 
   if (error) {
     alert("خطأ: " + error.message);
-    console.error(error);
   } else {
-    alert("تم الحفظ");
-    console.log(data);
+    document.getElementById("name").value = "";
+    loadData();
   }
 }
+
+// عرض البيانات
+async function loadData() {
+  const { data, error } = await client
+    .from("profiles")
+    .select("*");
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (data) {
+    data.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item.name;
+      list.appendChild(li);
+    });
+  }
+}
+
+// تحميل البيانات عند فتح الصفحة
+loadData();
 </script>
 
 </body>
