@@ -1,3 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نظام إدارة المدرسة</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f6fa;
+      margin: 0;
+    }
+
+    header {
+      background: #0b2545;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #163ea6;
+    }
+
+    input {
+      padding: 8px;
+      margin: 5px;
+    }
+
+    .file-link {
+      display: block;
+      margin-top: 10px;
+      color: green;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  نظام إدارة المدرسة
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h3>إضافة سجل جديد</h3>
+
+    <input type="text" id="title" placeholder="اسم السجل">
+
+    <br><br>
+
+    <input type="file" id="fileInput">
+
+    <br><br>
+
+    <button onclick="uploadFile()">حفظ + رفع شاهد</button>
+
+    <div id="result"></div>
+  </div>
+
+</div>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -7,8 +93,9 @@ const supabase = window.supabase.createClient(
 );
 
 async function uploadFile() {
-  const fileInput = document.querySelector('input[type="file"]');
+  const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
+  const title = document.getElementById("title").value;
 
   if (!file) {
     alert("اختر ملف أولاً");
@@ -17,7 +104,8 @@ async function uploadFile() {
 
   const fileName = Date.now() + "-" + file.name;
 
-  const { data, error } = await supabase.storage
+  // رفع الملف
+  const { error } = await supabase.storage
     .from("files")
     .upload(fileName, file);
 
@@ -27,11 +115,28 @@ async function uploadFile() {
     return;
   }
 
-  const { data: publicUrl } = supabase.storage
+  // جلب الرابط
+  const { data } = supabase.storage
     .from("files")
     .getPublicUrl(fileName);
 
-  alert("تم الرفع بنجاح");
-  console.log(publicUrl.publicUrl);
+  // حفظ في قاعدة البيانات
+  await supabase.from("core").insert([
+    {
+      type: "file",
+      title: title,
+      file_url: data.publicUrl,
+      status: "new",
+      score: 0
+    }
+  ]);
+
+  document.getElementById("result").innerHTML =
+    `<a class="file-link" href="${data.publicUrl}" target="_blank">عرض الملف</a>`;
+
+  alert("تم الحفظ بنجاح");
 }
 </script>
+
+</body>
+</html>
