@@ -1,104 +1,112 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>نظام إدارة المدرسة</title>
+<meta charset="UTF-8">
+<title>نظام إدارة المدرسة</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #f5f6fa;
-      margin: 0;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #f5f6fa;
+  margin: 0;
+}
 
-    header {
-      background: #0b2545;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 22px;
-    }
+header {
+  background: #0b2545;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  font-size: 22px;
+}
 
-    .container {
-      padding: 20px;
-    }
+.container {
+  padding: 20px;
+}
 
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
 
-    button {
-      background: #1d4ed8;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+button {
+  background: #1d4ed8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
 
-    button:hover {
-      background: #163ea6;
-    }
+button:hover {
+  background: #163ea6;
+}
 
-    input {
-      padding: 8px;
-      margin: 5px;
-    }
+input {
+  padding: 8px;
+  margin: 5px;
+}
 
-    .file-link {
-      display: block;
-      margin-top: 10px;
-      color: green;
-    }
-  </style>
+.item {
+  background: #fff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+</style>
+
 </head>
 
 <body>
 
 <header>
-  نظام إدارة المدرسة
+نظام إدارة المدرسة
 </header>
 
 <div class="container">
 
-  <div class="card">
-    <h3>إضافة سجل جديد</h3>
+<div class="card">
 
-    <input type="text" id="title" placeholder="اسم السجل">
+<h3>إضافة سجل + رفع شاهد</h3>
 
-    <br><br>
+<input type="text" id="title" placeholder="اسم السجل">
 
-    <input type="file" id="fileInput">
+<br><br>
 
-    <br><br>
+<input type="file" id="fileInput">
 
-    <button onclick="uploadFile()">حفظ + رفع شاهد</button>
+<br><br>
 
-    <div id="result"></div>
-  </div>
+<button onclick="uploadFile()">حفظ + رفع شاهد</button>
 
 </div>
 
-<!-- Supabase -->
+<div class="card">
+<h3>السجلات</h3>
+<div id="list"></div>
+</div>
+
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
 const supabase = window.supabase.createClient(
   "https://eslpnwxezkhddqxnhdlh.supabase.co",
   "sb_publishable_CiDtetBcI8pHxliy14Mhxg_yH1dgiL4"
 );
 
 async function uploadFile() {
+
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
   const title = document.getElementById("title").value;
 
   if (!file) {
-    alert("اختر ملف أولاً");
+    alert("اختر ملف");
     return;
   }
 
@@ -121,21 +129,53 @@ async function uploadFile() {
     .getPublicUrl(fileName);
 
   // حفظ في قاعدة البيانات
-  await supabase.from("core").insert([
-    {
+  const { error: dbError } = await supabase
+    .from("core")
+    .insert([{
       type: "file",
-      title: title,
-      file_url: data.publicUrl,
-      status: "new",
-      score: 0
-    }
-  ]);
+      title: title || "بدون اسم",
+      file_url: data.publicUrl
+    }]);
 
-  document.getElementById("result").innerHTML =
-    `<a class="file-link" href="${data.publicUrl}" target="_blank">عرض الملف</a>`;
+  if (dbError) {
+    alert("فشل حفظ البيانات");
+    return;
+  }
 
-  alert("تم الحفظ بنجاح");
+  alert("تم بنجاح");
+  loadData();
 }
+
+async function loadData() {
+
+  const { data, error } = await supabase
+    .from("core")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    div.innerHTML = `
+      <b>${item.title}</b><br>
+      ${item.file_url ? `<a href="${item.file_url}" target="_blank">عرض الشاهد</a>` : "لا يوجد ملف"}
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+loadData();
+
 </script>
 
 </body>
